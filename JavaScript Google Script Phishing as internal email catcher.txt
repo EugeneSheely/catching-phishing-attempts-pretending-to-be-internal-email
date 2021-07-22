@@ -1,0 +1,94 @@
+// Code created by Eugene Sheely and it's in JavaScript as a Google Script for gmail. We had some phising emails pretending to be staff members, this this code will add a label of "*Suspecious Smail" to the email in the inbox. I had it triggered to run every minute. The basic idea is that if the email has the name of one of our staff members but it's not from one of our domains or approved personal email it's then marked with the label. Every minute it runs it will grab the last ten emails on the inbox and run the code. The code will require you to add the label manually in gmail, which this code then fetch it. A trigger created in this app script to tun every minute. Other than that just add the data needed in the three lists below for employee names, domain names and personal emails and it should run. 
+
+function susemailfilter() {
+  //console.log("Hello world")
+
+
+  //Originally I was going to have the code grab all emails received today, this little section isn't necessary for this script, but am keeping it to use later in another project
+
+  //get today's date:
+  var today = new Date();
+  var dd = String(today.getDate()).padStart(2, '0');
+  var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+  var yyyy = today.getFullYear();
+  today = mm + '/' + dd + '/' + yyyy;
+
+  var yesterday = new Date(today)
+
+
+  yesterday.setDate(yesterday.getDate()-1)
+
+  dd = String(yesterday.getDate()).padStart(2, '0');
+  mm = String(yesterday.getMonth() + 1).padStart(2, '0'); //January is 0!
+  yyyy = yesterday.getFullYear();
+  //yesterday = mm + '/' + dd + '/' + yyyy;
+  yesterday =  yyyy  + '/' + mm + '/' + dd;
+
+
+
+  
+  console.log(yesterday)
+
+
+
+
+  // Search Emails and add if function:
+
+  //var threads = GmailApp.search('in:sent after:'+ yesterday );
+  //var threads = GmailApp.search('Eugene Sheely');
+
+  var employee_names = ['ADD LIST OF EMPLOYEE NAMES HERE'  ]
+
+  var company_domain_names = [ 'ADD LIST OF DOMAIN NAMES HERE']
+  
+  var personal_emails = ['ADD LIST OF PERSONAL EMAILS HERE']
+
+
+
+
+
+  var threads = GmailApp.getInboxThreads(0,10);
+  //var message = threads.getMessages()[0]; // Get first message
+  for (var i = 0; i < threads.length; i++) {
+    var message = threads[i].getMessages()[0]
+    //Logger.log(threads[i].getFirstMessageSubject());
+    //Logger.log(message.getFrom());
+
+    var from_details = message.getFrom()
+    var name = from_details.slice(0,from_details.search(" <"))
+    var email_domain =  from_details.slice(from_details.search("@")+1, from_details.length-1)
+    var email_address = from_details.slice(from_details.search("<")+1, from_details.length-1)
+    Logger.log(email_address);
+
+
+    var currentThread = GmailApp.getInboxThreads(0,1)[i];
+    //currentThread.addLabel("test label");
+
+
+    // Label can't be added as string, data type needs to be taken as a gmail label.
+    var label = GmailApp.getUserLabelByName("*Suspicious Email");
+    
+
+
+    if(employee_names.indexOf(name) >-1  && company_domain_names.indexOf(email_domain) < 0 && personal_emails.indexOf(email_address) <0  ){
+      Logger.log("***************IF STATEMENT ENTERED!!!!!!!!")
+      Logger.log(name);
+      Logger.log(email_domain);
+      Logger.log(message.getFrom());
+
+
+
+     threads[i].addLabel(label);
+    }
+
+
+
+
+    // If Statement to determine if I add a tag:
+    
+
+
+
+
+  }
+}
